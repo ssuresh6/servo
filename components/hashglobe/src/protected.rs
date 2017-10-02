@@ -164,25 +164,6 @@ impl<K: Hash + Eq, V, S: BuildHasher> ProtectedHashMap<K, V, S>
     }
 }
 
-impl<K, V> ProtectedHashMap<K, V, RandomState>
-    where K: Eq + Hash,
-{
-    pub fn new() -> Self {
-        Self {
-            map: HashMap::new(),
-            readonly: true,
-        }
-    }
-
-    pub fn with_capacity(capacity: usize) -> Self {
-        let mut result = Self {
-            map: HashMap::with_capacity(capacity),
-            readonly: true,
-        };
-        result.protect();
-        result
-    }
-}
 
 impl<K, V, S> PartialEq for ProtectedHashMap<K, V, S>
     where K: Eq + Hash,
