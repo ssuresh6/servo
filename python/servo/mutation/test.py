@@ -16,6 +16,8 @@ from mutator import Mutator, get_strategies
 from enum import Enum
 DEVNULL = open(os.devnull, 'wb')
 
+strategy_try_map = {}
+
 logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s", level=logging.DEBUG)
 
 
@@ -25,8 +27,6 @@ class Status(Enum):
     SKIPPED = 2
     UNEXPECTED = 3
 
-
-strategy_try_map = {}
 
 def mutation_test(file_name, tests):
     status = Status.UNEXPECTED
@@ -38,14 +38,15 @@ def mutation_test(file_name, tests):
         strategies = list(get_strategies())
         for item in strategies:
             strategy_try_map[item] = False
-
         fallback_on_failure = True
+
         while fallback_on_failure and len(strategies):
-            strategy = random.choice(strategies)()
+            strategy = random.choice(strategies)
             strategies.remove(strategy)
-            mutator = Mutator(strategy)
+            mutator = Mutator(strategy())
             mutated_line = mutator.mutate(file_name)
             if mutated_line != -1:
+                fallback_on_failure = False
                 logging.info("Mutated {0} at line {1}".format(file_name, mutated_line))
                 logging.info("compiling mutant {0}:{1}".format(file_name, mutated_line))
                 if subprocess.call('python mach build --release', shell=True, stdout=DEVNULL):
@@ -68,14 +69,10 @@ def mutation_test(file_name, tests):
                 logging.info("reverting mutant {0}:{1}".format(file_name, mutated_line))
                 subprocess.call('git checkout {0}'.format(file_name), shell=True)
             else:
-                logging.info("Cannot mutate {0}".format(file_name))
-                # update map
                 strategy_try_map[strategy] = True
                 if all(try_flag is True for try_flag in strategy_try_map.itervalues()):
                     # All strategies are tried
+                    logging.info("Cannot mutate {0}".format(file_name))
                     fallback_on_failure = False
-
             print "-" * 80 + "\n"
-
-
     return status
