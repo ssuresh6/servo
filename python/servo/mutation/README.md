@@ -7,8 +7,11 @@ For more info refer [Wiki page](https://en.wikipedia.org/wiki/Mutation_testing).
 
 Here Mutation testing is used to test the coverage of WPT for Servo's browser engine.
 
-### Mutation Strategy
-This version of mutation testing consists of a Python script that finds random uses of && in Servo's code base and replaces them by ||. The expectation from the WPT tests is to catch this mutation and result in failures when executed on the corresponding code base.
+### Mutation Strategy Example
+Mutation testing consists of a Python script which implements various strategies such as the one that finds random uses of && in Servo's code base and replaces them by ||. The expectation from the WPT tests is to catch this mutation and result in failures when executed on the corresponding code base.
+
+### Implementation 
+In the servo/python/servo/mutation/mutator.py file, write a regular expression matching operation for && and include it in the 'regex' dictionary. Include a class with the same name as in the regex dictionary for the corresponding entry and write the replacement strategy in it. Now add this class name in the get_strategies method within the same file.
 
 ### Test Run Strategy
 The mutation test aims to run only tests which are concerned with the mutant. Therefore part of WPT test is related to the source code under mutation is invoked. For this it requires a test mapping in source folders.
